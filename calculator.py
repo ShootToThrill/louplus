@@ -91,9 +91,9 @@ class Calculator:
 		tax_base = 5000
 		base = salary
 		if salary < self.JiShuL:
-			base = JiShuL
+			base = self.JiShuL
 		if salary > self.JiShuH:
-			base = JiShuH
+			base = self.JiShuH
 
 		Shebao_count = base * (self.YangLao + self.YiLiao + self.ShiYe + self.GongShang + self.ShengYu )
 		GongJiJin_count = base * self.GongJiJin
@@ -122,9 +122,9 @@ class Calculator:
 if __name__ == '__main__':
 	params = sys.argv[1:]
 	args = Args(params)
-	print(args.confit_path)
-	print(args.salarys_path)
-	print(args.output_path)
+	# print(args.confit_path)
+	#print(args.salarys_path)
+	# print(args.output_path)
 
 	config = Config(args.confit_path)
 	config_data = config.data
@@ -133,6 +133,7 @@ if __name__ == '__main__':
 	##JiShuL,JiShuH,YangLao,YiLiao,ShiYe,GongShang,ShengYu,GongJiJin
 	calculator = Calculator(config_data.get('JiShuL'),config_data.get('JiShuH'),config_data.get('YangLao'),config_data.get('YiLiao'),config_data.get('ShiYe'),config_data.get('GongShang'),config_data.get('ShengYu'),config_data.get('GongJiJin'))
 	users_salary = salarys.data
+	#print(users_salary)
 	for i in users_salary:
 		if len(i) != 2:
 			print('{} salarys file is invalid'.format(args.salarys_path))
