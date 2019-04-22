@@ -75,17 +75,30 @@ class User:
 
 
 
-#JiShuL,JiShuH,YangLao,YiLiao,ShiYe,GongShang,ShengYu,GongJiJin
-class Calculator:
-	def __init__(self,JiShuL,JiShuH,YangLao,YiLiao,ShiYe,GongShang,ShengYu,GongJiJin):
-		self.JiShuL = JiShuL
-		self.JiShuH = JiShuH
-		self.YangLao = YangLao
-		self.YiLiao = YiLiao
-		self.ShiYe = ShiYe
-		self.GongShang = GongShang
-		self.ShengYu = ShengYu
-		self.GongJiJin = GongJiJin
+class Calculator(object):
+	config_keys = ['JiShuL','JiShuH','YangLao','YiLiao','ShiYe','GongShang','ShengYu','GongJiJin']
+
+	def __init__(self,config_path):
+		self.config_path = config_path
+		self.get_config()
+
+	def get_config(self):
+		ret = {}
+		with open(self.config_path) as f:
+			for i in f:
+				item = i.split('=')
+				if len(item) == 2:
+					ret[item[0].strip()] = float(item[1].strip())
+				else:
+					print('config file \'s content is invalid')
+
+		for key in self.config_keys:
+			if key not in ret:
+				print('config file dismiss {} value'.format(key))
+				sys.exit(-1)
+
+			else:
+				self.__dict__[key] = ret[key]
 
 	def calculate(self,salary):
 		tax_base = 5000
@@ -122,18 +135,14 @@ class Calculator:
 if __name__ == '__main__':
 	params = sys.argv[1:]
 	args = Args(params)
-	# print(args.confit_path)
-	#print(args.salarys_path)
-	# print(args.output_path)
 
 	config = Config(args.confit_path)
 	config_data = config.data
 
 	salarys = Salarys(args.salarys_path)
-	##JiShuL,JiShuH,YangLao,YiLiao,ShiYe,GongShang,ShengYu,GongJiJin
-	calculator = Calculator(config_data.get('JiShuL'),config_data.get('JiShuH'),config_data.get('YangLao'),config_data.get('YiLiao'),config_data.get('ShiYe'),config_data.get('GongShang'),config_data.get('ShengYu'),config_data.get('GongJiJin'))
+	calculator = Calculator(args.confit_path)
 	users_salary = salarys.data
-	#print(users_salary)
+	
 	for i in users_salary:
 		if len(i) != 2:
 			print('{} salarys file is invalid'.format(args.salarys_path))
