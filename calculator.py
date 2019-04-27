@@ -73,7 +73,9 @@ class User:
 		with open(path,'a') as f:
 			csv.writer(f).writerow([self.code,self.salary,self.sb_count,self.tax_count,self.salary_real])
 
-
+def get_salary_data(path):
+	salarys = Salarys(path)
+	return salarys.data
 
 class Calculator(object):
 	config_keys = ['JiShuL','JiShuH','YangLao','YiLiao','ShiYe','GongShang','ShengYu','GongJiJin']
@@ -139,9 +141,9 @@ if __name__ == '__main__':
 	config = Config(args.confit_path)
 	config_data = config.data
 
-	salarys = Salarys(args.salarys_path)
+	users_salary = get_salary_data(args.salarys_path)
+
 	calculator = Calculator(args.confit_path)
-	users_salary = salarys.data
 	
 	for i in users_salary:
 		if len(i) != 2:
