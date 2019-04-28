@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import sys,csv
+from multiprocessing import Queue,Process,Pool
 
 #/Users/tongchuan/louplus
 #./calculator.py -c /home/shiyanlou/test.cfg -d /home/shiyanlou/user.csv -o /tmp/gongzi.csv
 #./calculator.py -c /Users/tongchuan/louplus/test.cfg -d /Users/tongchuan/louplus/user.csv -o /tmp/gongzi.csv
+#./calculator.py -c test.cfg -d user.csv -o gongzi.csv
 
 
 class Args:
@@ -32,22 +34,6 @@ class Args:
 		return self.get_param_value('-o')
 
 
-class Config:
-	def __init__(self,path):
-		self._path = path
-
-	@property
-	def data(self):
-		ret = {}
-		with open(self._path) as f:
-			for i in f:
-				item = i.split('=')
-				if len(item) == 2:
-					ret[item[0].strip()] = float(item[1].strip())
-				else:
-					print('config file \'s content is invalid')
-		return ret
-
 
 class Salarys:
 	def __init__(self,path):
@@ -73,9 +59,10 @@ class User:
 		with open(path,'a') as f:
 			csv.writer(f).writerow([self.code,self.salary,self.sb_count,self.tax_count,self.salary_real])
 
-def get_salary_data(path):
+def get_salary_data(path,q):
 	salarys = Salarys(path)
-	return salarys.data
+	ret = salarys.data
+	q.put(ret)
 
 class Calculator(object):
 	config_keys = ['JiShuL','JiShuH','YangLao','YiLiao','ShiYe','GongShang','ShengYu','GongJiJin']
@@ -132,27 +119,64 @@ class Calculator(object):
 			tax = taxable * 40e-2 - 15160
 
 		salary_real = salary - Shebao_count - GongJiJin_count - tax
-		return (salary,Shebao_count+GongJiJin_count,tax,salary_real)
+		return [salary,'{:.2f}'.format(Shebao_count+GongJiJin_count),'{:.2f}'.format(tax),'{:.2f}'.format(salary_real)]
+
+
+def calculate_salary(calculator,q1,q2):
+
+	
+
+	salarys = q1.get()
+	ret = []
+	for i in salarys:
+		code,salary_str = i
+		salary = int(salary_str)
+		salary_tax = calculator.calculate(salary)
+		salary_tax.insert(0,code)
+		ret.append(salary_tax)
+	q2.put(ret)
+
+def dist(q,output_path):
+	data = q.get()
+	with open(output_path,'w') as f:
+			csv.writer(f).writerows(data)
 
 if __name__ == '__main__':
 	params = sys.argv[1:]
 	args = Args(params)
 
-	config = Config(args.confit_path)
-	config_data = config.data
-
-	users_salary = get_salary_data(args.salarys_path)
-
 	calculator = Calculator(args.confit_path)
+
+	q1 = Queue()
+	q2 = Queue()
+
+	p_list = []
+
+	p_list.append(Process(target=get_salary_data, args=(args.salarys_path,q1,)))
+	p_list.append(Process(target=calculate_salary, args=(calculator,q1,q2)))
+	p_list.append(Process(target=dist,args=(q2,args.output_path)))
 	
-	for i in users_salary:
-		if len(i) != 2:
-			print('{} salarys file is invalid'.format(args.salarys_path))
-			sys.exit(-1)
-		else:
-			salary = int(i[1])
-			code = i[0]
-			salary,sb_count,tax_count,salary_real = calculator.calculate(salary)
-			user = User(code,salary,sb_count,tax_count,salary_real)
-			user.dist(args.output_path)
+	for i in p_list:
+		i.start()
+
+	# for i in p_list:
+	# 	i.join()
+
+
+
+
+	# users_salary = get_salary_data(args.salarys_path)
+
+	
+	# for i in users_salary:
+	# 	if len(i) != 2:
+	# 		print('{} salarys file is invalid'.format(args.salarys_path))
+	# 		sys.exit(-1)
+	# 	else:
+	# 		salary = int(i[1])
+	# 		code = i[0]
+	# 		salary,sb_count,tax_count,salary_real = calculator.calculate(salary)
+	# 		user = User(code,salary,sb_count,tax_count,salary_real)
+	# 		user.dist(args.output_path)
+
 
