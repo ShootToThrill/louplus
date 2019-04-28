@@ -33,8 +33,6 @@ class Args:
 	def output_path(self):
 		return self.get_param_value('-o')
 
-
-
 class Salarys:
 	def __init__(self,path):
 		self._path = path
@@ -59,10 +57,7 @@ class User:
 		with open(path,'a') as f:
 			csv.writer(f).writerow([self.code,self.salary,self.sb_count,self.tax_count,self.salary_real])
 
-def get_salary_data(path,q):
-	salarys = Salarys(path)
-	ret = salarys.data
-	q.put(ret)
+
 
 class Calculator(object):
 	config_keys = ['JiShuL','JiShuH','YangLao','YiLiao','ShiYe','GongShang','ShengYu','GongJiJin']
@@ -121,11 +116,12 @@ class Calculator(object):
 		salary_real = salary - Shebao_count - GongJiJin_count - tax
 		return [salary,'{:.2f}'.format(Shebao_count+GongJiJin_count),'{:.2f}'.format(tax),'{:.2f}'.format(salary_real)]
 
+def get_salary_task(path,q):
+	with open(path) as f:
+			ret = list(csv.reader(f))
+	q.put(ret)
 
-def calculate_salary(calculator,q1,q2):
-
-	
-
+def calculate_task(calculator,q1,q2):
 	salarys = q1.get()
 	ret = []
 	for i in salarys:
@@ -136,7 +132,7 @@ def calculate_salary(calculator,q1,q2):
 		ret.append(salary_tax)
 	q2.put(ret)
 
-def dist(q,output_path):
+def dist_task(q,output_path):
 	data = q.get()
 	with open(output_path,'w') as f:
 			csv.writer(f).writerows(data)
@@ -152,9 +148,9 @@ if __name__ == '__main__':
 
 	p_list = []
 
-	p_list.append(Process(target=get_salary_data, args=(args.salarys_path,q1,)))
-	p_list.append(Process(target=calculate_salary, args=(calculator,q1,q2)))
-	p_list.append(Process(target=dist,args=(q2,args.output_path)))
+	p_list.append(Process(target=get_salary_task, args=(args.salarys_path,q1,)))
+	p_list.append(Process(target=calculate_task, args=(calculator,q1,q2)))
+	p_list.append(Process(target=dist_task,args=(q2,args.output_path)))
 	
 	for i in p_list:
 		i.start()
