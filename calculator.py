@@ -11,16 +11,18 @@ from multiprocessing import Queue,Process,Pool
 
 
 class Args:
-	_short = ['-C:', '-c:' '-d:', '-o:']
-	_long = []
+	_short = ['-C:', '-c:' '-d:', '-o:','-h']
+	_long = ['help']
+	_help_info = 'Usage: calculator.py -C cityname -c configfile -d userdata -o resultdata'
 
 	def __init__(self,params):
 		opts = getopt.getopt(params,''.join(self._short),self._long)
-		self.short_map = dict(opts[0])
-		print(self.short_map)
+		self._map = dict(opts[0])
+		if '-h' in self._map or '--help' in self._map:
+			print(self._help_info)
 
 	def get_param_value(self,param):
-		return self.short_map.get(param,None)
+		return self._map.get(param,None)
 
 	@property
 	def config_path(self):
@@ -141,9 +143,9 @@ def dist_task(q,output_path):
 if __name__ == '__main__':
 	params = sys.argv[1:]
 	args = Args(params)
-	print(args.config_path)
-	print(args.salarys_path)
-	print(args.output_path)
+	# print(args.config_path)
+	# print(args.salarys_path)
+	# print(args.output_path)
 
 	# calculator = Calculator(args.confit_path)
 
