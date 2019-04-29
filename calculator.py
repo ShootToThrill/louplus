@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys,csv,getopt
 from multiprocessing import Queue,Process,Pool
+from configparser import ConfigParser
 
 #/Users/tongchuan/louplus
 #./calculator.py -c /home/shiyanlou/test.cfg -d /home/shiyanlou/user.csv -o /tmp/gongzi.csv
@@ -36,6 +37,10 @@ class Args:
 	def output_path(self):
 		return self.get_param_value('-o')
 
+	@property
+	def city(self):
+		return self.get_param_value('-C')
+
 class Salarys:
 	def __init__(self,path):
 		self._path = path
@@ -65,27 +70,23 @@ class User:
 class Calculator(object):
 	config_keys = ['JiShuL','JiShuH','YangLao','YiLiao','ShiYe','GongShang','ShengYu','GongJiJin']
 
-	def __init__(self,config_path):
+	def __init__(self,config_path,city='DEFAULT'):
 		self.config_path = config_path
+		self.city = city
 		self.get_config()
 
 	def get_config(self):
-		ret = {}
-		with open(self.config_path) as f:
-			for i in f:
-				item = i.split('=')
-				if len(item) == 2:
-					ret[item[0].strip()] = float(item[1].strip())
-				else:
-					print('config file \'s content is invalid')
-
+		conf = ConfigParser()
+		conf.read(self.config_path,encoding='UTF-8')
+		if not self.city in conf.sections():
+			self.city = 'DEFAULT'
+		data = conf[self.city]
 		for key in self.config_keys:
-			if key not in ret:
+			if key not in data:
 				print('config file dismiss {} value'.format(key))
 				sys.exit(-1)
-
 			else:
-				self.__dict__[key] = ret[key]
+				self.__dict__[key] = float(data.get(key))
 
 	def calculate(self,salary):
 		tax_base = 5000
@@ -147,7 +148,8 @@ if __name__ == '__main__':
 	# print(args.salarys_path)
 	# print(args.output_path)
 
-	# calculator = Calculator(args.confit_path)
+	calculator = Calculator(args.config_path,args.city)
+
 
 	# q1 = Queue()
 	# q2 = Queue()
@@ -160,25 +162,5 @@ if __name__ == '__main__':
 	
 	# for i in p_list:
 	# 	i.start()
-
-	# for i in p_list:
-	# 	i.join()
-
-
-
-
-	# users_salary = get_salary_data(args.salarys_path)
-
-	
-	# for i in users_salary:
-	# 	if len(i) != 2:
-	# 		print('{} salarys file is invalid'.format(args.salarys_path))
-	# 		sys.exit(-1)
-	# 	else:
-	# 		salary = int(i[1])
-	# 		code = i[0]
-	# 		salary,sb_count,tax_count,salary_real = calculator.calculate(salary)
-	# 		user = User(code,salary,sb_count,tax_count,salary_real)
-	# 		user.dist(args.output_path)
 
 
