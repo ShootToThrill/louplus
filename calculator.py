@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
-import sys,csv
+import sys,csv,getopt
 from multiprocessing import Queue,Process,Pool
 
 #/Users/tongchuan/louplus
 #./calculator.py -c /home/shiyanlou/test.cfg -d /home/shiyanlou/user.csv -o /tmp/gongzi.csv
 #./calculator.py -c /Users/tongchuan/louplus/test.cfg -d /Users/tongchuan/louplus/user.csv -o /tmp/gongzi.csv
 #./calculator.py -c test.cfg -d user.csv -o gongzi.csv
+#./calculator.py -C Chengdu -c test.cfg -d user.csv -o gongzi.csv
+
 
 
 class Args:
+	_short = ['-C:', '-c:' '-d:', '-o:']
+	_long = []
+
 	def __init__(self,params):
-		self._params = params
+		opts = getopt.getopt(params,''.join(self._short),self._long)
+		self.short_map = dict(opts[0])
+		print(self.short_map)
 
 	def get_param_value(self,param):
-		index = self._params.index(param)
-		value_index = index+1
-		if 0 < value_index < len(self._params):
-			return self._params[value_index]
-		else:
-			print('Params Error')
-			sys.exit(-1)
+		return self.short_map.get(param,None)
 
 	@property
-	def confit_path(self):
+	def config_path(self):
 		return self.get_param_value('-c')
 
 	@property
@@ -140,20 +141,23 @@ def dist_task(q,output_path):
 if __name__ == '__main__':
 	params = sys.argv[1:]
 	args = Args(params)
+	print(args.config_path)
+	print(args.salarys_path)
+	print(args.output_path)
 
-	calculator = Calculator(args.confit_path)
+	# calculator = Calculator(args.confit_path)
 
-	q1 = Queue()
-	q2 = Queue()
+	# q1 = Queue()
+	# q2 = Queue()
 
-	p_list = []
+	# p_list = []
 
-	p_list.append(Process(target=get_salary_task, args=(args.salarys_path,q1,)))
-	p_list.append(Process(target=calculate_task, args=(calculator,q1,q2)))
-	p_list.append(Process(target=dist_task,args=(q2,args.output_path)))
+	# p_list.append(Process(target=get_salary_task, args=(args.salarys_path,q1,)))
+	# p_list.append(Process(target=calculate_task, args=(calculator,q1,q2)))
+	# p_list.append(Process(target=dist_task,args=(q2,args.output_path)))
 	
-	for i in p_list:
-		i.start()
+	# for i in p_list:
+	# 	i.start()
 
 	# for i in p_list:
 	# 	i.join()
