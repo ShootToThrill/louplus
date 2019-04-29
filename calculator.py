@@ -2,6 +2,7 @@
 import sys,csv,getopt
 from multiprocessing import Queue,Process,Pool
 from configparser import ConfigParser
+from datetime import datetime
 
 #/Users/tongchuan/louplus
 #./calculator.py -c /home/shiyanlou/test.cfg -d /home/shiyanlou/user.csv -o /tmp/gongzi.csv
@@ -39,7 +40,7 @@ class Args:
 
 	@property
 	def city(self):
-		return self.get_param_value('-C')
+		return self.get_param_value('-C').upper()
 
 class Salarys:
 	def __init__(self,path):
@@ -133,6 +134,8 @@ def calculate_task(calculator,q1,q2):
 		salary = int(salary_str)
 		salary_tax = calculator.calculate(salary)
 		salary_tax.insert(0,code)
+		now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+		salary_tax.append(now)
 		ret.append(salary_tax)
 	q2.put(ret)
 
@@ -151,16 +154,16 @@ if __name__ == '__main__':
 	calculator = Calculator(args.config_path,args.city)
 
 
-	# q1 = Queue()
-	# q2 = Queue()
+	q1 = Queue()
+	q2 = Queue()
 
-	# p_list = []
+	p_list = []
 
-	# p_list.append(Process(target=get_salary_task, args=(args.salarys_path,q1,)))
-	# p_list.append(Process(target=calculate_task, args=(calculator,q1,q2)))
-	# p_list.append(Process(target=dist_task,args=(q2,args.output_path)))
+	p_list.append(Process(target=get_salary_task, args=(args.salarys_path,q1,)))
+	p_list.append(Process(target=calculate_task, args=(calculator,q1,q2)))
+	p_list.append(Process(target=dist_task,args=(q2,args.output_path)))
 	
-	# for i in p_list:
-	# 	i.start()
+	for i in p_list:
+		i.start()
 
 
