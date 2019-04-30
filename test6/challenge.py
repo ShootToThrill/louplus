@@ -32,17 +32,17 @@ def split():
         if type(i[0]) != str:
             year = str(i[0].year)
             if year not in _map:
-                _map[year] = []
+                _map[year] = [('创建时间','课程名称','学习人数','学习时间')]
             _map[year].append(i)
 
     for k,v in _map.items():
-        print(k)
         wb = Workbook()
-        ws = wb.create_sheet(title=k)
+        ws = wb.active
+        ws.title = k
         for i in v:
             ws.append(i)
         wb.save('{}.xlsx'.format(k))
 
 if __name__ == '__main__':
-    #combine()
+    combine()
     split()
