@@ -1,4 +1,5 @@
-from openpyxl import load_workbook
+from openpyxl import load_workbook,Workbook
+from datetime import datetime,time
 
 def combine():
     wb_path = 'courses.xlsx'
@@ -20,5 +21,28 @@ def combine():
 
     wb.save('courses.xlsx')
 
+def split():
+    wb_path = 'courses.xlsx'
+    wb = load_workbook(wb_path)
+
+    combine = wb['combine']
+
+    _map = {}
+    for i in combine.values:
+        if type(i[0]) != str:
+            year = str(i[0].year)
+            if year not in _map:
+                _map[year] = []
+            _map[year].append(i)
+
+    for k,v in _map.items():
+        print(k)
+        wb = Workbook()
+        ws = wb.create_sheet(title=k)
+        for i in v:
+            ws.append(i)
+        wb.save('{}.xlsx'.format(k))
+
 if __name__ == '__main__':
-    combine()
+    #combine()
+    split()
