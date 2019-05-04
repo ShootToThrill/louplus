@@ -1,0 +1,6 @@
+<h1>{{file.title}}</h1>
+<p>{{file.content}}</p>
+<p>categroy:{{file.category.name}}</p>
+<p>
+	tags:{% for tag in file.tags %} <span>{{tag.name}}</span> {% endfor %}
+</p>
