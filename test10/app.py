@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,render_template,abort
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -25,8 +25,21 @@ class Category(db.Model):
 	def __repr__(self):
 		return '<Category(name=%s)' % (self.name)
 
+@app.errorhandler(404)
+def notfound(err):
+	return render_template('404.html'), 404
 
-# db.create_all()
+@app.route('/')
+def index():
+	files = File.query.all()
+	return render_template('index.html',files=files)
+
+@app.route('/files/<file_id>')
+def file(file_id):
+	_file = File.query.filter_by(id=file_id).first()
+	if not _file:
+		abort(404)
+	return render_template('file.html',file=_file)
 
 if __name__ == '__main__':
 	app.run()
