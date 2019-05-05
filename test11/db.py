@@ -1,10 +1,10 @@
 from app import *
 db.create_all()
 # ?? MySQL ????
-java = Category('Java')
-python = Category('Python')
-file1 = File('Hello Java', datetime.utcnow(), java, 'File Content - Java is cool!')
-file2 = File('Hello Python', datetime.utcnow(), python, 'File Content - Python is cool!')
+java = Category(name='Java')
+python = Category(name='Python')
+file1 = File(title='Hello Java', create_time=datetime.utcnow(), category=java, content='File Content - Java is cool!')
+file2 = File(title='Hello Python', create_time=datetime.utcnow(), category=python, content='File Content - Python is cool!')
 db.session.add(java)
 db.session.add(python)
 db.session.add(file1)
