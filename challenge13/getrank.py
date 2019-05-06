@@ -1,14 +1,6 @@
 import sys
 from pymongo import MongoClient
 
-# db.contests.aggregate(
-# ... [
-# ... {
-# ... $project:{item:1,score_all:{$add:['$score','$submit_time']}}
-# ... }
-# ... ]
-# ... )
-
 def get_rank(user_id):
     print(user_id)
     client = MongoClient()

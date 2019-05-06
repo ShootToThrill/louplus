@@ -27,52 +27,18 @@ class File(db.Model):
 		return '<File(title=%s)' % (self.title)
 
 	def add_tag(self,tag_name):
-		exist_tag = mongodb.tag.find_one({
-			'name':tag_name
-		})
-		files = [self.id]
-		if exist_tag:
-			print(exist_tag)
-			exist_tag_files = exist_tag.get('files')
-
-			if exist_tag_files:
-				if not self.id in exist_tag_files:
-					exist_tag_files.append(self.id)
-					files = exist_tag_files
-				else:
-					return {'success':0, 'msg': 'file:{} already has the tag {}'.format(self.title,tag_name)}
-
-			mongodb.tag.update_one({
-				'_id': exist_tag.get('_id')
-			},{
-				'$set':{
-					'files': files
-				}
-			})
-		else:
-			mongodb.tag.insert_one({
-				'name':tag_name,
-				'files': files
-			})
-
-		return {'success': 1 }
-				
+		ret = mongodb.tag.update({'name':tag_name},{"$addToSet":{'files':self.id}},True)
+		return ret
 
 
 	def remove_tag(self,tag_name):
-		tag = mongodb.find_one({
+		tag = mongodb.tag.find_one({
 			'name': tag_name
 		})
 
 		if tag:
-			files = tag.files.remove(self.id),
-			mongodb.tag.update_one({
-				'_id': tag._id
-			},{
-				'$set':{
-					'files': files
-				}
-			})
+			tag.get('files').remove(self.id)
+			mongodb.tag.save(tag)
 		else:
 			return {'success':0,'msg':'tag {} not exist'.format(tag_name)}
 
