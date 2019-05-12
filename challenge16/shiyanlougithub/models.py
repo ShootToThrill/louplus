@@ -7,7 +7,7 @@ engine = create_engine('mysql://root@localhost/shiyanlougithub?charset=utf8')
 Base = declarative_base()
 
 class Repository(Base):
-    __tablename__ = 'repositories'
+    __tablename__ = 'repositories2'
     id = Column(Integer, primary_key=True)
     name = Column(String(64), index=True)
     update_time = Column(DateTime)
