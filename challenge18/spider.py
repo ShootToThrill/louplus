@@ -5,7 +5,9 @@ from selenium import webdriver
 from selenium.webdriver import ActionChains
 from scrapy.http import HtmlResponse
 
-
+#linux install chrome:https://www.jianshu.com/p/7d83e3a324f9
+#download chrome driver https://chromedriver.storage.googleapis.com/index.html?path=74.0.3729.6/
+#Selenium + WebDriver 实现控制浏览器https://www.jianshu.com/p/861660b6fb3f
 
 def parse_result():
 	ret = []
