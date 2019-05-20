@@ -103,5 +103,3 @@ class UserAgentMiddleware(_UserAgentMiddleware):
     def process_request(self, request, spider):
         ua = random.choice(self.user_agent_list)
         request.headers['User-Agent'] = ua
-        print('==================================',ua)
-        print(request.headers)

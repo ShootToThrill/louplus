@@ -15,7 +15,7 @@ class AwesomeMovieSpider(CrawlSpider):
     	Rule(LinkExtractor(allow=r"https://movie.douban.com/subject/.+/?from=subject-page"), follow=True, callback="parse_page"),
     )
 
-    def parse_movie_item(self, response):
+    def parse_page(self, response):
         score_str = response.css('div.rating_self strong.rating_num::text').extract_first()
         try:
         	score = float(score_str)
@@ -31,10 +31,10 @@ class AwesomeMovieSpider(CrawlSpider):
 
         	return item
 
-    def parse_start_url(self, response):
-        yield self.parse_movie_item(response)
+    # def parse_start_url(self, response):
+    #     yield self.parse_movie_item(response)
 
 
-    def parse_page(self, response):
-        yield self.parse_movie_item(response)
+    # def parse_page(self, response):
+    #     yield self.parse_movie_item(response)
 

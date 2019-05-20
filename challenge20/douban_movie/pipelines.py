@@ -9,13 +9,8 @@ import redis
 
 
 class DoubanMoviePipeline(object):
-    count = 0
     def process_item(self, item, spider):
         self.redis.lpush('douban_movie:items',json.dumps(dict(item)))
-        self.count +=1
-        if self.count >=30:
-            spider.crawler.engine.close_spider(spider,'there is already 30 item and now stop!')
-        print(json.dumps(dict(item)))
         return item
 
     def open_spider(self,spider):
