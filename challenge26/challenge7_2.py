@@ -7,8 +7,8 @@ def data_handle(df):
     df = df.fillna(method='ffill',axis=1).fillna(method='bfill',axis=1)
     df.replace(pd.np.nan,0,inplace=True)
     s = df.sum(axis=1)
-    # return (s-s.min())/(s.max()-s.min())
-    return s
+    return (s-s.min())/(s.max()-s.min())
+    # return s
 
 def co2_gdp_plot():
     data = pd.read_excel('ClimateChange.xlsx',sheetname='Data')
@@ -16,11 +16,8 @@ def co2_gdp_plot():
     co2 = data[data['Series code']=='EN.ATM.CO2E.KT']
     country_index_map = gdp['Country code'].to_frame()
     country_index_map.index = pd.np.arange(len(country_index_map))
-    print(country_index_map)
-    gdp_fill = data_handle(gdp)
-    co2_fill = data_handle(co2)
-    gdp_min_max = (gdp_fill-gdp_fill.min())/(gdp_fill.max()-gdp_fill.min())
-    co2_min_max = (co2_fill-co2_fill.min())/(co2_fill.max()-co2_fill.min())
+    gdp_min_max = data_handle(gdp)
+    co2_min_max = data_handle(co2)
     x_labels = ['CHN', 'USA', 'GBR', 'FRA','RUS']
     x_labels_index = [ country_index_map[country_index_map['Country code'] == i ].index.values[0] for i in x_labels]
     fig = plt.figure()
