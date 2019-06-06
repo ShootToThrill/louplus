@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 
 def data_fix(df):
     df.set_index('Country code',inplace=True)
-    df.drop(df.columns[:5],inplace=True,axis=1)
-    df.replace('..',pd.np.nan,inplace=True)
-    df = df.fillna(method='ffill',axis=1).fillna(method='bfill',axis=1)
-    df.replace(pd.np.nan,0,inplace=True)
-    return df
+    df_fill = df.replace({'..':pd.np.nan}).iloc[:,5:].fillna(method='ffill',axis=1).fillna(method='bfill',axis=1)
+    return df_fill
+
+def min_max(data):
+	return (data-data.min())/(data.max()-data.min())
 
 def climate_plot():
 	tmp = pd.read_excel('GlobalTemperature.xlsx')
@@ -19,16 +19,16 @@ def climate_plot():
 	clts_all = reduce(lambda x,y:x+y,clts_fix)
 	clts_sum = clts_all.sum()
 	clts_sum = clts_sum.iloc[:-1]
-	clts_sum_min_max = (clts_sum-clts_sum.min())/(clts_sum.max()-clts_sum.min())
+	clts_sum_min_max = min_max(clts_sum)
 
-	tmp.replace(pd.np.nan,0,inplace=True)
+	# tmp.replace(pd.np.nan,0,inplace=True)
 	tmp['Date'] = pd.to_datetime(tmp['Date'])
 	tmp.set_index('Date',inplace=True)
 
 	tmp_year = tmp.resample('A').sum()
 	tmp_year.index = tmp_year.index.year
 	tmp_year = tmp_year.loc[1990:2010]
-	tmp_min_max = (tmp_year-tmp_year.min())/(tmp_year.max()-tmp_year.min())
+	tmp_min_max = min_max(tmp_year)
 
 	p1 = pd.concat([clts_sum_min_max,tmp_min_max.drop(tmp_min_max.columns[1:3],axis=1)],axis=1)
 	p1.rename(columns={p1.columns[0]:'Total GHG'},inplace=True)
@@ -42,14 +42,22 @@ def climate_plot():
 
 	ax2 = fig.add_subplot(2,2,2)
 	ax2 =p1.plot(ax=ax2,legend=True, grid=True,kind='bar')
+	ax2.set_xlabel('Years')
+	ax2.set_ylabel('Values')
 
-	p3_data = tmp.drop(tmp.columns[1:3],axis=1).resample('Q').sum()
+	p3_data = tmp.drop(tmp.columns[1:3],axis=1).resample('Q').mean()
 	ax3 = fig.add_subplot(2,2,3)
 	ax3 =p3_data.plot(ax=ax3,legend=True, grid=True,kind='area')
+	ax3.set_xlabel('Quarters')
+	ax3.set_ylabel('Temperature')
 
 	ax4 = fig.add_subplot(2,2,4)
-	ax5 =p3_data.plot(ax=ax4,legend=True, grid=True,kind='kde')
+	ax4 =p3_data.plot(ax=ax4,legend=True, grid=True,kind='kde')
+	ax4.set_xlabel('Values')
+	ax4.set_ylabel('Values')
 
-	# fig.show()
+	plt.show()
 
-	return fig.gca()
+	return fig
+
+climate_plot()
